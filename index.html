@@ -327,6 +327,7 @@
     let esSalaPublica = false;
     let firebaseListo = false;
     let fb = {};
+    let mensajesVistos = new Set(); // para no duplicar
 
     const chat = document.getElementById('chat');
 
@@ -418,9 +419,8 @@
         return;
       }
 
-      agregarMensaje('yo', nombreUsuario, texto);
-      input.value = '';
-      input.focus();
+      // Guardamos localmente el texto para no duplicarlo cuando vuelva de Firebase
+      const textoLocal = texto;
 
       if (firebaseListo && fb.push) {
         fb.push(fb.ref(fb.db, 'mensajes/' + codigoSala), {
@@ -431,7 +431,13 @@
           console.error("Error al enviar:", err);
           agregarMensaje('sistema error', '', '❌ Error al enviar: ' + err.message);
         });
+      } else {
+        // Sin Firebase, solo local
+        agregarMensaje('yo', nombreUsuario, textoLocal);
       }
+
+      input.value = '';
+      input.focus();
     };
 
     // ============================================================
@@ -488,29 +494,40 @@
     }
 
     // ============================================================
-    // ESCUCHAR MENSAJES
+    // ESCUCHAR MENSAJES (mejorado)
     // ============================================================
     function iniciarEscucha() {
       if (!firebaseListo || !fb.onChildAdded) return;
+
+      mensajesVistos.clear();
 
       const mensajesRef = fb.query(
         fb.ref(fb.db, 'mensajes/' + codigoSala),
         fb.limitToLast(100)
       );
 
-      let primeraCarga = true;
-
       fb.onChildAdded(mensajesRef, (snapshot) => {
+        const key = snapshot.key;
         const data = snapshot.val();
         if (!data) return;
-        if (primeraCarga) return;
-        if (data.nombre === nombreUsuario && !data.hora) return;
+        if (mensajesVistos.has(key)) return;
+        mensajesVistos.add(key);
 
         const tipo = data.nombre === nombreUsuario ? 'yo' : 'otro';
+
+        // Si es mi propio mensaje, no lo duplicamos (ya se ve al enviarlo)
+        if (tipo === 'yo') {
+          const ultimo = chat.lastElementChild;
+          if (ultimo && ultimo.classList.contains('yo')) {
+            const textoPantalla = ultimo.querySelector('.texto')?.textContent;
+            if (textoPantalla === data.texto) return;
+          }
+        }
+
         agregarMensaje(tipo, data.nombre, data.texto);
       });
 
-      setTimeout(() => primeraCarga = false, 800);
+      console.log("👂 Escuchando mensajes en sala:", codigoSala);
     }
 
     // ============================================================
@@ -545,7 +562,7 @@
     });
 
     // ============================================================
-    // CARGAR FIREBASE (tu config real)
+    // CARGAR FIREBASE
     // ============================================================
     (async function initFirebase() {
       try {

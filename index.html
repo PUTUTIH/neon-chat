@@ -326,12 +326,12 @@
     let codigoSala = "";
     let esSalaPublica = false;
     let firebaseListo = false;
-    let fb = {}; // aquí guardaremos las funciones de Firebase
+    let fb = {};
 
     const chat = document.getElementById('chat');
 
     // ============================================================
-    // NAVEGACIÓN DE MODALES (funciones globales desde el inicio)
+    // NAVEGACIÓN DE MODALES
     // ============================================================
     function cerrarTodo() {
       document.querySelectorAll('.modal').forEach(m => m.classList.add('oculto'));
@@ -418,12 +418,10 @@
         return;
       }
 
-      // Mensaje local (siempre aparece en tu pantalla al instante)
       agregarMensaje('yo', nombreUsuario, texto);
       input.value = '';
       input.focus();
 
-      // Enviar a Firebase si está listo
       if (firebaseListo && fb.push) {
         fb.push(fb.ref(fb.db, 'mensajes/' + codigoSala), {
           nombre: nombreUsuario,
@@ -505,7 +503,7 @@
       fb.onChildAdded(mensajesRef, (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
-        if (primeraCarga) return; // ignorar los ya existentes al entrar
+        if (primeraCarga) return;
         if (data.nombre === nombreUsuario && !data.hora) return;
 
         const tipo = data.nombre === nombreUsuario ? 'yo' : 'otro';
@@ -542,13 +540,12 @@
       }[c]));
     }
 
-    // Enter para enviar
     document.getElementById('inputMensaje').addEventListener('keypress', e => {
       if (e.key === 'Enter') window.enviar();
     });
 
     // ============================================================
-    // CARGAR FIREBASE (con try/catch para no romper la app)
+    // CARGAR FIREBASE (tu config real)
     // ============================================================
     (async function initFirebase() {
       try {
@@ -556,28 +553,19 @@
         const { getDatabase, ref, push, onChildAdded, serverTimestamp, query, limitToLast }
           = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
 
-        /* ⚠️⚠️⚠️ PEGA AQUÍ TU CONFIG DE FIREBASE ⚠️⚠️⚠️ */
         const firebaseConfig = {
-          apiKey: "TU_API_KEY",
-          authDomain: "TU_AUTH_DOMAIN",
-          databaseURL: "TU_DATABASE_URL",
-          projectId: "TU_PROJECT_ID",
-          storageBucket: "TU_STORAGE_BUCKET",
-          messagingSenderId: "TU_MESSAGING_SENDER_ID",
-          appId: "TU_APP_ID"
+          apiKey: "AIzaSyCdZK6J0P1nvvLhKqI6zZfYp3QajSCybNo",
+          authDomain: "neon-chat-5d3bc.firebaseapp.com",
+          databaseURL: "https://neon-chat-5d3bc-default-rtdb.firebaseio.com",
+          projectId: "neon-chat-5d3bc",
+          storageBucket: "neon-chat-5d3bc.firebasestorage.app",
+          messagingSenderId: "59021322456",
+          appId: "1:59021322456:web:457414eb330ee8e22bcfad"
         };
-        /* ⚠️⚠️⚠️ FIN DEL CONFIG ⚠️⚠️⚠️ */
-
-        // Detectar si NO está configurado de verdad
-        if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "TU_API_KEY") {
-          console.warn("⚠️ Firebase no configurado. Los mensajes no se enviarán a otros usuarios.");
-          return;
-        }
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Guardar referencias
         fb = { db: database, ref, push, onChildAdded, serverTimestamp, query, limitToLast };
         firebaseListo = true;
         console.log("✅ Firebase conectado");

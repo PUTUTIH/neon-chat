@@ -75,7 +75,10 @@
       align-self: center; background: rgba(0,0,0,0.4);
       color: #aaa; font-size: 0.78rem; font-style: italic;
       padding: 6px 14px; border-radius: 20px; text-align: center;
+      max-width: 90%;
     }
+    .msg.sistema.error { color: #ff5577; border: 1px solid rgba(255,0,100,0.4); }
+    .msg.sistema.ok { color: #00ff88; border: 1px solid rgba(0,255,136,0.3); }
 
     .input-area {
       display: flex; padding: 10px 12px;
@@ -94,6 +97,7 @@
     }
     .input-area input:focus { border-color: #00e5ff; box-shadow: 0 0 15px rgba(0,229,255,0.5); }
     .input-area input::placeholder { color: #888; }
+    .input-area input:disabled { opacity: 0.4; }
     .input-area button {
       padding: 12px 18px; border-radius: 30px; border: none;
       background: linear-gradient(90deg,#ff00c8,#a200ff);
@@ -102,6 +106,7 @@
       font-size: 1rem; flex-shrink: 0;
     }
     .input-area button:active { transform: scale(0.95); }
+    .input-area button:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .modal {
       position: fixed; inset: 0;
@@ -314,43 +319,40 @@
   </div>
 
   <script>
-    // ================================================================
-    // 1) FUNCIONES GLOBALES PRIMERO (para que los botones funcionen YA)
-    // ================================================================
+    // ============================================================
+    // VARIABLES GLOBALES
+    // ============================================================
     let nombreUsuario = "";
     let codigoSala = "";
     let esSalaPublica = false;
-    let db = null;
     let firebaseListo = false;
+    let fb = {}; // aquí guardaremos las funciones de Firebase
 
     const chat = document.getElementById('chat');
 
+    // ============================================================
+    // NAVEGACIÓN DE MODALES (funciones globales desde el inicio)
+    // ============================================================
     function cerrarTodo() {
       document.querySelectorAll('.modal').forEach(m => m.classList.add('oculto'));
     }
 
-    window.volverInicio = function() {
-      cerrarTodo();
-      document.getElementById('modalInicio').classList.remove('oculto');
-    };
-    window.mostrarCrear = function() {
-      cerrarTodo();
-      document.getElementById('modalCrear').classList.remove('oculto');
-    };
-    window.mostrarUnirse = function() {
-      cerrarTodo();
-      document.getElementById('modalUnirse').classList.remove('oculto');
-    };
-    window.mostrarPublica = function() {
-      cerrarTodo();
-      document.getElementById('modalPublica').classList.remove('oculto');
-    };
+    window.volverInicio = () => { cerrarTodo(); document.getElementById('modalInicio').classList.remove('oculto'); };
+    window.mostrarCrear = () => { cerrarTodo(); document.getElementById('modalCrear').classList.remove('oculto'); };
+    window.mostrarUnirse = () => { cerrarTodo(); document.getElementById('modalUnirse').classList.remove('oculto'); };
+    window.mostrarPublica = () => { cerrarTodo(); document.getElementById('modalPublica').classList.remove('oculto'); };
 
+    // ============================================================
+    // GENERAR CÓDIGO ALEATORIO
+    // ============================================================
     window.generarCodigoAleatorio = function() {
       const codigo = Math.floor(100000 + Math.random() * 900000).toString();
       document.getElementById('codigoCrear').value = codigo;
     };
 
+    // ============================================================
+    // CREAR SALA
+    // ============================================================
     window.crearSala = function() {
       const nombre = document.getElementById('nombreCrear').value.trim();
       const codigo = document.getElementById('codigoCrear').value.trim();
@@ -368,6 +370,9 @@
       setTimeout(() => abrirCompartir(), 600);
     };
 
+    // ============================================================
+    // UNIRSE CON CÓDIGO
+    // ============================================================
     window.unirSala = function() {
       const nombre = document.getElementById('nombreUnir').value.trim();
       const codigo = document.getElementById('codigoUnir').value.trim();
@@ -384,6 +389,9 @@
       entrarAlChat(`Te has unido a la sala "${codigo}" 🔒`);
     };
 
+    // ============================================================
+    // SALA PÚBLICA
+    // ============================================================
     window.entrarPublica = function() {
       const nombre = document.getElementById('nombrePublica').value.trim();
       const aviso = document.getElementById('avisoPublica');
@@ -397,30 +405,40 @@
       entrarAlChat(`Estás en la sala pública 🌍`);
     };
 
+    // ============================================================
+    // ENVIAR MENSAJE
+    // ============================================================
     window.enviar = function() {
       const input = document.getElementById('inputMensaje');
       const texto = input.value.trim();
-      if (!texto) return;
 
-      if (!firebaseListo) {
-        // Modo demo local: solo se ve en tu pantalla
-        agregarMensaje('yo', nombreUsuario, texto);
-        input.value = '';
-        input.focus();
+      if (!texto) return;
+      if (!codigoSala) {
+        agregarMensaje('sistema error', '', '⚠️ Primero entra a una sala');
         return;
       }
 
-      // Import dinámico: usamos las funciones expuestas por el módulo
-      window._fbPush(ref(window._fbDb, 'mensajes/' + codigoSala), {
-        nombre: nombreUsuario,
-        texto: texto,
-        hora: window._fbServerTimestamp()
-      });
-
+      // Mensaje local (siempre aparece en tu pantalla al instante)
+      agregarMensaje('yo', nombreUsuario, texto);
       input.value = '';
       input.focus();
+
+      // Enviar a Firebase si está listo
+      if (firebaseListo && fb.push) {
+        fb.push(fb.ref(fb.db, 'mensajes/' + codigoSala), {
+          nombre: nombreUsuario,
+          texto: texto,
+          hora: fb.serverTimestamp()
+        }).catch(err => {
+          console.error("Error al enviar:", err);
+          agregarMensaje('sistema error', '', '❌ Error al enviar: ' + err.message);
+        });
+      }
     };
 
+    // ============================================================
+    // COMPARTIR CÓDIGO
+    // ============================================================
     window.abrirCompartir = function() {
       if (esSalaPublica || !codigoSala) {
         alert("Estás en la sala pública. Crea un código para tener una sala privada.");
@@ -432,9 +450,7 @@
       document.getElementById('modalCompartir').classList.remove('oculto');
     };
 
-    window.cerrarCompartir = function() {
-      document.getElementById('modalCompartir').classList.add('oculto');
-    };
+    window.cerrarCompartir = () => document.getElementById('modalCompartir').classList.add('oculto');
 
     window.copiarCodigo = function() {
       const codigo = document.getElementById('codigoMostrado').textContent;
@@ -452,9 +468,9 @@
       window.open('https://wa.me/?text=' + encodeURIComponent(mensaje), '_blank');
     };
 
-    // ================================================================
-    // 2) FUNCIONES INTERNAS
-    // ================================================================
+    // ============================================================
+    // ENTRAR AL CHAT
+    // ============================================================
     function entrarAlChat(mensajeSistema) {
       cerrarTodo();
       document.getElementById('inputMensaje').disabled = false;
@@ -465,37 +481,49 @@
       agregarMensaje('sistema', '', mensajeSistema);
 
       if (!firebaseListo) {
-        agregarMensaje('sistema', '', '⚠️ Firebase no configurado: los mensajes NO se enviarán a otros usuarios');
+        agregarMensaje('sistema error', '', '⚠️ Firebase no configurado: los mensajes solo se ven en tu pantalla');
         return;
       }
 
+      agregarMensaje('sistema ok', '', '✅ Conectado en tiempo real');
       iniciarEscucha();
     }
 
+    // ============================================================
+    // ESCUCHAR MENSAJES
+    // ============================================================
     function iniciarEscucha() {
-      if (!firebaseListo) return;
+      if (!firebaseListo || !fb.onChildAdded) return;
 
-      const mensajesRef = window._fbQuery(
-        ref(window._fbDb, 'mensajes/' + codigoSala),
-        window._fbLimitToLast(100)
+      const mensajesRef = fb.query(
+        fb.ref(fb.db, 'mensajes/' + codigoSala),
+        fb.limitToLast(100)
       );
 
-      window._fbOnChildAdded(mensajesRef, (snapshot) => {
+      let primeraCarga = true;
+
+      fb.onChildAdded(mensajesRef, (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
-        if (!data.hora) return; // ignorar el mensaje local optimista
+        if (primeraCarga) return; // ignorar los ya existentes al entrar
+        if (data.nombre === nombreUsuario && !data.hora) return;
 
         const tipo = data.nombre === nombreUsuario ? 'yo' : 'otro';
         agregarMensaje(tipo, data.nombre, data.texto);
       });
+
+      setTimeout(() => primeraCarga = false, 800);
     }
 
+    // ============================================================
+    // RENDER MENSAJES
+    // ============================================================
     function agregarMensaje(tipo, nombre, texto) {
       const div = document.createElement('div');
       div.className = 'msg ' + tipo;
       const hora = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
-      if (tipo === 'sistema') {
+      if (tipo.startsWith('sistema')) {
         div.textContent = texto;
       } else {
         div.innerHTML = `
@@ -514,14 +542,14 @@
       }[c]));
     }
 
-    // Enter envío
+    // Enter para enviar
     document.getElementById('inputMensaje').addEventListener('keypress', e => {
       if (e.key === 'Enter') window.enviar();
     });
 
-    // ================================================================
-    // 3) CARGAR FIREBASE (con try/catch para que no rompa los botones)
-    // ================================================================
+    // ============================================================
+    // CARGAR FIREBASE (con try/catch para no romper la app)
+    // ============================================================
     (async function initFirebase() {
       try {
         const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
@@ -529,41 +557,34 @@
           = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
 
         /* ⚠️⚠️⚠️ PEGA AQUÍ TU CONFIG DE FIREBASE ⚠️⚠️⚠️ */
-const firebaseConfig = {
-  apiKey: "AIzaSyD61V8jUSJHflfqMIn6eVslWR3VHHoKBkY",
-  authDomain: "neon-chat-c0219.firebaseapp.com",
-  databaseURL: "https://neon-chat-c0219-default-rtdb.firebaseio.com",
-  projectId: "neon-chat-c0219",
-  storageBucket: "neon-chat-c0219.firebasestorage.app",
-  messagingSenderId: "213750770065",
-  appId: "1:213750770065:web:3cdb55e663334292289230",
-  measurementId: "G-B0WRQW71L0"
-};
+        const firebaseConfig = {
+          apiKey: "TU_API_KEY",
+          authDomain: "TU_AUTH_DOMAIN",
+          databaseURL: "TU_DATABASE_URL",
+          projectId: "TU_PROJECT_ID",
+          storageBucket: "TU_STORAGE_BUCKET",
+          messagingSenderId: "TU_MESSAGING_SENDER_ID",
+          appId: "TU_APP_ID"
+        };
         /* ⚠️⚠️⚠️ FIN DEL CONFIG ⚠️⚠️⚠️ */
 
-        // Verificar si está configurado de verdad
-        if (firebaseConfig.apiKey === "TU_API_KEY") {
-          console.warn("⚠️ Firebase no configurado. Los mensajes NO se enviarán a otros usuarios.");
+        // Detectar si NO está configurado de verdad
+        if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "TU_API_KEY") {
+          console.warn("⚠️ Firebase no configurado. Los mensajes no se enviarán a otros usuarios.");
           return;
         }
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Exponer al window para que las funciones globales las usen
-        window._fbDb = database;
-        window._fbRef = ref;
-        window._fbPush = push;
-        window._fbOnChildAdded = onChildAdded;
-        window._fbServerTimestamp = serverTimestamp;
-        window._fbQuery = query;
-        window._fbLimitToLast = limitToLast;
-
+        // Guardar referencias
+        fb = { db: database, ref, push, onChildAdded, serverTimestamp, query, limitToLast };
         firebaseListo = true;
         console.log("✅ Firebase conectado");
 
       } catch (e) {
         console.error("❌ Error al conectar Firebase:", e);
+        firebaseListo = false;
       }
     })();
   </script>

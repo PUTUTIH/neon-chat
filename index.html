@@ -3,292 +3,308 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#0a0a1a">
   <title>NEON CHAT</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; -webkit-tap-highlight-color: transparent; }
-
-    html, body {
-      height: 100%;
-      overflow: hidden;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; }
     body {
-      background: #0a0a1a;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      height: 100dvh;
+      background: #0a0a1a; color: white;
+      display: flex; flex-direction: column; height: 100dvh;
     }
-
-    /* LUCES DE FONDO */
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
+      content: ''; position: fixed; inset: 0;
       background:
         radial-gradient(circle at 20% 30%, rgba(255,0,200,0.35), transparent 40%),
         radial-gradient(circle at 80% 60%, rgba(0,200,255,0.35), transparent 40%),
         radial-gradient(circle at 50% 90%, rgba(150,0,255,0.35), transparent 40%);
-      animation: luces 8s infinite alternate;
-      z-index: -1;
+      animation: luces 8s infinite alternate; z-index: -1;
     }
-    @keyframes luces {
-      0%   { filter: hue-rotate(0deg); }
-      100% { filter: hue-rotate(90deg); }
-    }
+    @keyframes luces { 0%{filter:hue-rotate(0deg)} 100%{filter:hue-rotate(90deg)} }
 
     /* HEADER */
     header {
-      padding: 15px 20px;
-      padding-top: max(15px, env(safe-area-inset-top));
+      padding: 12px 15px;
+      padding-top: max(12px, env(safe-area-inset-top));
       background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(255,0,200,0.4);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-shrink: 0;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-shrink: 0; gap: 8px;
     }
     header h1 {
-      font-size: 1.3rem;
-      letter-spacing: 3px;
-      background: linear-gradient(90deg, #ff00c8, #00e5ff, #a200ff);
+      font-size: 1.1rem; letter-spacing: 2px;
+      background: linear-gradient(90deg,#ff00c8,#00e5ff,#a200ff);
       background-size: 300% 300%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
       animation: brillo 4s infinite;
     }
-    @keyframes brillo {
-      0%,100% { background-position: 0% 50%; }
-      50%     { background-position: 100% 50%; }
+    @keyframes brillo { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+
+    .sala-btn {
+      font-size: 0.72rem; color: #00e5ff;
+      background: rgba(0,229,255,0.1);
+      border: 1px solid rgba(0,229,255,0.4);
+      padding: 5px 10px; border-radius: 20px;
+      display: flex; align-items: center; gap: 6px;
+      cursor: pointer; transition: 0.3s;
     }
-    header .estado {
-      font-size: 0.8rem;
-      color: #00e5ff;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    header .punto {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: #00ff88;
-      box-shadow: 0 0 10px #00ff88;
-      animation: parpadeo 1.5s infinite;
-    }
-    @keyframes parpadeo {
-      0%,100% { opacity: 1; }
-      50%     { opacity: 0.3; }
-    }
+    .sala-btn:active { transform: scale(0.95); }
 
     /* CHAT */
     .chat {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      flex: 1; overflow-y: auto; padding: 15px;
+      display: flex; flex-direction: column; gap: 10px;
       -webkit-overflow-scrolling: touch;
     }
     .chat::-webkit-scrollbar { width: 6px; }
     .chat::-webkit-scrollbar-thumb { background: #ff00c8; border-radius: 3px; }
 
-    /* MENSAJES */
     .msg {
-      max-width: 80%;
-      padding: 10px 15px;
-      border-radius: 18px;
-      animation: aparecer 0.3s ease;
-      word-wrap: break-word;
+      max-width: 80%; padding: 10px 14px; border-radius: 18px;
+      animation: aparecer 0.3s ease; word-wrap: break-word;
     }
-    @keyframes aparecer {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .msg .nombre {
-      font-size: 0.75rem;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
+    @keyframes aparecer { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .msg .nombre { font-size: 0.72rem; font-weight: bold; margin-bottom: 4px; }
     .msg .texto { font-size: 0.95rem; line-height: 1.4; }
-    .msg .hora {
-      font-size: 0.65rem;
-      opacity: 0.6;
-      margin-top: 4px;
-      text-align: right;
-    }
-    .msg.yo {
-      align-self: flex-end;
-      background: linear-gradient(135deg, #ff00c8, #a200ff);
-      box-shadow: 0 0 15px rgba(255,0,200,0.5);
-    }
+    .msg .hora { font-size: 0.65rem; opacity: 0.6; margin-top: 4px; text-align: right; }
+    .msg.otro { align-self: flex-start; background: rgba(255,255,255,0.08); border: 1px solid rgba(0,229,255,0.4); }
+    .msg.otro .nombre { color: #00e5ff; }
+    .msg.yo { align-self: flex-end; background: linear-gradient(135deg,#ff00c8,#a200ff); box-shadow: 0 0 15px rgba(255,0,200,0.5); }
     .msg.yo .nombre { color: #fff; }
     .msg.sistema {
-      align-self: center;
-      background: rgba(0,0,0,0.4);
-      color: #aaa;
-      font-size: 0.8rem;
-      font-style: italic;
-      padding: 6px 14px;
-      border-radius: 20px;
-      text-align: center;
+      align-self: center; background: rgba(0,0,0,0.4);
+      color: #aaa; font-size: 0.78rem; font-style: italic;
+      padding: 6px 14px; border-radius: 20px; text-align: center;
     }
 
     /* INPUT */
     .input-area {
-      display: flex;
-      padding: 12px 15px;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      display: flex; padding: 10px 12px;
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
       background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border-top: 1px solid rgba(255,0,200,0.4);
-      gap: 8px;
-      flex-shrink: 0;
+      gap: 8px; flex-shrink: 0;
     }
     .input-area input {
-      flex: 1;
-      padding: 12px 18px;
-      border-radius: 30px;
+      flex: 1; padding: 12px 16px; border-radius: 30px;
       border: 1px solid rgba(255,0,200,0.5);
       background: rgba(255,255,255,0.05);
-      color: white;
-      font-size: 16px; /* 16px evita zoom en iPhone */
-      outline: none;
-      transition: 0.3s;
+      color: white; font-size: 16px; outline: none;
       min-width: 0;
     }
-    .input-area input:focus {
-      border-color: #00e5ff;
-      box-shadow: 0 0 15px rgba(0,229,255,0.5);
-    }
+    .input-area input:focus { border-color: #00e5ff; box-shadow: 0 0 15px rgba(0,229,255,0.5); }
     .input-area input::placeholder { color: #888; }
     .input-area button {
-      padding: 12px 20px;
-      border-radius: 30px;
-      border: none;
-      background: linear-gradient(90deg, #ff00c8, #a200ff);
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
+      padding: 12px 18px; border-radius: 30px; border: none;
+      background: linear-gradient(90deg,#ff00c8,#a200ff);
+      color: white; font-weight: bold; cursor: pointer;
       box-shadow: 0 0 15px rgba(255,0,200,0.5);
-      transition: 0.3s;
-      font-size: 1rem;
-      flex-shrink: 0;
+      font-size: 1rem; flex-shrink: 0;
     }
-    .input-area button:active {
-      transform: scale(0.95);
-    }
+    .input-area button:active { transform: scale(0.95); }
 
-    /* BOTÓN MÚSICA */
-    .musica-btn {
-      position: fixed;
-      bottom: 90px;
-      right: 20px;
-      width: 55px;
-      height: 55px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #ff00c8, #a200ff);
-      border: none;
-      color: white;
-      font-size: 1.4rem;
-      cursor: pointer;
-      box-shadow: 0 0 20px #ff00c8;
-      z-index: 200;
-      transition: 0.3s;
-    }
-    .musica-btn:active { transform: scale(0.9); }
-
-    /* MODAL NOMBRE */
+    /* MODAL */
     .modal {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: rgba(0,0,0,0.85);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: flex; justify-content: center; align-items: center;
       z-index: 999;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       padding: 20px;
     }
     .modal.oculto { display: none; }
     .modal-box {
-      background: rgba(20,20,40,0.95);
+      background: rgba(20,20,40,0.97);
       border: 1px solid rgba(255,0,200,0.6);
-      border-radius: 20px;
-      padding: 35px 25px;
+      border-radius: 20px; padding: 30px 22px;
       text-align: center;
       box-shadow: 0 0 40px rgba(255,0,200,0.5);
-      max-width: 380px;
-      width: 100%;
+      max-width: 400px; width: 100%;
+      max-height: 92vh; overflow-y: auto;
     }
     .modal-box h2 {
-      margin-bottom: 10px;
-      background: linear-gradient(90deg, #ff00c8, #00e5ff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      font-size: 1.8rem;
-      letter-spacing: 2px;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg,#ff00c8,#00e5ff);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      font-size: 1.6rem; letter-spacing: 2px;
     }
-    .modal-box p { color: #aaa; margin-bottom: 25px; font-size: 0.9rem; }
+    .modal-box p { color: #aaa; margin-bottom: 20px; font-size: 0.85rem; line-height: 1.4; }
+
+    .opcion {
+      display: block; width: 100%;
+      padding: 16px; margin-bottom: 12px;
+      border-radius: 15px; border: 2px solid transparent;
+      background: rgba(255,255,255,0.05);
+      color: white; font-size: 1rem; font-weight: bold;
+      cursor: pointer; transition: 0.3s;
+      text-align: left;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .opcion:hover, .opcion:active {
+      border-color: #ff00c8;
+      background: rgba(255,0,200,0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(255,0,200,0.3);
+    }
+    .opcion .icono { font-size: 1.6rem; }
+    .opcion .texto-op { flex: 1; }
+    .opcion .titulo-op { color: #00e5ff; font-size: 0.95rem; }
+    .opcion .desc-op { color: #888; font-size: 0.72rem; font-weight: normal; margin-top: 3px; }
+
+    .modal-box label { display: block; text-align: left; color: #00e5ff; font-size: 0.78rem; margin-bottom: 6px; margin-top: 12px; }
     .modal-box input {
-      width: 100%;
-      padding: 14px 18px;
-      border-radius: 30px;
+      width: 100%; padding: 13px 16px; border-radius: 30px;
       border: 1px solid rgba(255,0,200,0.5);
       background: rgba(255,255,255,0.05);
-      color: white;
-      font-size: 16px;
-      outline: none;
-      margin-bottom: 20px;
+      color: white; font-size: 16px; outline: none;
       text-align: center;
+      text-transform: uppercase;
     }
-    .modal-box input:focus {
-      border-color: #00e5ff;
-      box-shadow: 0 0 15px rgba(0,229,255,0.5);
+    .modal-box input:focus { border-color: #00e5ff; box-shadow: 0 0 15px rgba(0,229,255,0.5); }
+    .modal-box .btn-principal {
+      width: 100%; padding: 14px; border-radius: 30px; border: none;
+      background: linear-gradient(90deg,#ff00c8,#a200ff);
+      color: white; font-weight: bold; font-size: 1rem;
+      cursor: pointer; letter-spacing: 1px;
+      margin-top: 18px;
     }
-    .modal-box button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 30px;
-      border: none;
-      background: linear-gradient(90deg, #ff00c8, #a200ff);
-      color: white;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      letter-spacing: 1px;
-      transition: 0.3s;
+    .modal-box .btn-principal:active { transform: scale(0.97); }
+    .modal-box .btn-secundario {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,0,200,0.4);
+      margin-top: 10px;
+      font-size: 0.9rem;
     }
-    .modal-box button:active { transform: scale(0.97); }
+
+    .codigo-grande {
+      font-family: monospace;
+      font-size: 2rem;
+      letter-spacing: 6px;
+      color: #00e5ff;
+      background: rgba(0,229,255,0.1);
+      border: 2px dashed #00e5ff;
+      padding: 18px;
+      border-radius: 12px;
+      margin: 15px 0;
+      text-shadow: 0 0 15px #00e5ff;
+      user-select: all;
+      word-break: break-all;
+    }
+    .aviso { font-size: 0.78rem; color: #ff00c8; margin-top: 10px; min-height: 18px; }
   </style>
 </head>
 <body>
 
-  <div class="modal" id="modalNombre">
+  <!-- MODAL BIENVENIDA -->
+  <div class="modal" id="modalInicio">
     <div class="modal-box">
       <h2>NEON CHAT</h2>
-      <p>Entra en la sala 💜</p>
-      <input type="text" id="inputNombre" placeholder="Tu nombre..." maxlength="15" autocomplete="off">
-      <button onclick="entrar()">Entrar</button>
+      <p>¿Qué quieres hacer?</p>
+
+      <button class="opcion" onclick="mostrarCrear()">
+        <span class="icono">🔑</span>
+        <span class="texto-op">
+          <div class="titulo-op">Crear un código</div>
+          <div class="desc-op">Tú inventas el código y se lo pasas a tus amigos</div>
+        </span>
+      </button>
+
+      <button class="opcion" onclick="mostrarUnirse()">
+        <span class="icono">🔒</span>
+        <span class="texto-op">
+          <div class="titulo-op">Unirme con código</div>
+          <div class="desc-op">Ya tienes un código de un amigo</div>
+        </span>
+      </button>
+
+      <button class="opcion" onclick="mostrarPublica()">
+        <span class="icono">🌍</span>
+        <span class="texto-op">
+          <div class="titulo-op">Sala pública</div>
+          <div class="desc-op">Habla con todo el mundo</div>
+        </span>
+      </button>
     </div>
   </div>
 
+  <!-- MODAL CREAR CÓDIGO -->
+  <div class="modal oculto" id="modalCrear">
+    <div class="modal-box">
+      <h2>CREAR CÓDIGO</h2>
+      <p>Elige un código único y pásaselo a tus amigos</p>
+
+      <label>Tu nombre</label>
+      <input type="text" id="nombreCrear" placeholder="Ej: María" maxlength="15" autocomplete="off" style="text-transform:none;">
+
+      <label>Tu código (inventado por ti)</label>
+      <input type="text" id="codigoCrear" placeholder="Ej: AMIGOS2026" maxlength="16" autocomplete="off">
+
+      <button class="btn-principal" onclick="crearSala()">Crear y entrar 🔑</button>
+      <button class="btn-principal btn-secundario" onclick="volverInicio()">← Volver</button>
+
+      <p class="aviso" id="avisoCrear"></p>
+    </div>
+  </div>
+
+  <!-- MODAL UNIRSE -->
+  <div class="modal oculto" id="modalUnirse">
+    <div class="modal-box">
+      <h2>UNIRME</h2>
+      <p>Escribe el código que te pasó tu amigo</p>
+
+      <label>Tu nombre</label>
+      <input type="text" id="nombreUnir" placeholder="Ej: Carlos" maxlength="15" autocomplete="off" style="text-transform:none;">
+
+      <label>Código de la sala</label>
+      <input type="text" id="codigoUnir" placeholder="Ej: AMIGOS2026" maxlength="16" autocomplete="off">
+
+      <button class="btn-principal" onclick="unirSala()">Entrar 🔒</button>
+      <button class="btn-principal btn-secundario" onclick="volverInicio()">← Volver</button>
+
+      <p class="aviso" id="avisoUnir"></p>
+    </div>
+  </div>
+
+  <!-- MODAL SALA PÚBLICA -->
+  <div class="modal oculto" id="modalPublica">
+    <div class="modal-box">
+      <h2>SALA PÚBLICA</h2>
+      <p>Todos los que entren aquí se ven entre sí</p>
+
+      <label>Tu nombre</label>
+      <input type="text" id="nombrePublica" placeholder="Ej: Ana" maxlength="15" autocomplete="off" style="text-transform:none;">
+
+      <button class="btn-principal" onclick="entrarPublica()">Entrar 🌍</button>
+      <button class="btn-principal btn-secundario" onclick="volverInicio()">← Volver</button>
+
+      <p class="aviso" id="avisoPublica"></p>
+    </div>
+  </div>
+
+  <!-- MODAL COMPARTIR CÓDIGO -->
+  <div class="modal oculto" id="modalCompartir">
+    <div class="modal-box">
+      <h2>TU CÓDIGO</h2>
+      <p>Pásaselo a tus amigos para que entren a tu sala</p>
+
+      <div class="codigo-grande" id="codigoMostrado">----</div>
+
+      <button class="btn-principal" onclick="copiarCodigo()">📋 Copiar código</button>
+      <button class="btn-principal btn-secundario" onclick="compartirWhatsApp()">📱 Compartir por WhatsApp</button>
+      <button class="btn-principal btn-secundario" onclick="cerrarCompartir()">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- HEADER -->
   <header>
     <h1>NEON CHAT</h1>
-    <div class="estado">
-      <span class="punto"></span>
-      <span id="numUsuarios">Sala en vivo</span>
+    <div class="sala-btn" onclick="abrirCompartir()">
+      🔑 <span id="codigoHeader">----</span>
     </div>
   </header>
 
+  <!-- CHAT -->
   <div class="chat" id="chat"></div>
 
   <div class="input-area">
@@ -296,40 +312,167 @@
     <button onclick="enviar()" id="btnEnviar" disabled>➤</button>
   </div>
 
-  <button class="musica-btn" onclick="toggleMusica()" id="btnMusica">🎵</button>
+  <!-- FIREBASE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded, serverTimestamp, query, limitToLast }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  <audio id="audioFondo" loop>
-    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
-  </audio>
+    /* ⚠️ PEGA AQUÍ TU CONFIG DE FIREBASE */
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_AUTH_DOMAIN",
+      databaseURL: "TU_DATABASE_URL",
+      projectId: "TU_PROJECT_ID",
+      storageBucket: "TU_STORAGE_BUCKET",
+      messagingSenderId: "TU_MESSAGING_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
 
-  <script>
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
     let nombreUsuario = "";
+    let codigoSala = "";
+    let esSalaPublica = false;
     const chat = document.getElementById('chat');
 
-    function entrar() {
-      const input = document.getElementById('inputNombre');
-      const nombre = input.value.trim();
-      if (!nombre) {
-        input.style.borderColor = '#ff0055';
-        return;
-      }
+    // ========== NAVEGACIÓN MODALES ==========
+    function cerrarTodo() {
+      document.querySelectorAll('.modal').forEach(m => m.classList.add('oculto'));
+    }
+    window.volverInicio = () => { cerrarTodo(); document.getElementById('modalInicio').classList.remove('oculto'); };
+    window.mostrarCrear = () => { cerrarTodo(); document.getElementById('modalCrear').classList.remove('oculto'); };
+    window.mostrarUnirse = () => { cerrarTodo(); document.getElementById('modalUnirse').classList.remove('oculto'); };
+    window.mostrarPublica = () => { cerrarTodo(); document.getElementById('modalPublica').classList.remove('oculto'); };
+
+    // ========== CREAR SALA CON CÓDIGO ==========
+    window.crearSala = function() {
+      const nombre = document.getElementById('nombreCrear').value.trim();
+      const codigo = document.getElementById('codigoCrear').value.trim().toUpperCase().replace(/\s+/g, '');
+      const aviso = document.getElementById('avisoCrear');
+
+      if (!nombre) { aviso.textContent = "⚠️ Escribe tu nombre"; return; }
+      if (!codigo) { aviso.textContent = "⚠️ Inventa un código"; return; }
+      if (codigo.length < 3) { aviso.textContent = "⚠️ El código debe tener al menos 3 caracteres"; return; }
+
       nombreUsuario = nombre;
-      document.getElementById('modalNombre').classList.add('oculto');
+      codigoSala = "privada-" + codigo;
+      esSalaPublica = false;
+
+      entrarAlChat(`Has creado la sala "${codigo}" 🔑`);
+      // Abrir automáticamente el modal para compartir
+      setTimeout(() => abrirCompartir(), 600);
+    };
+
+    // ========== UNIRSE CON CÓDIGO ==========
+    window.unirSala = function() {
+      const nombre = document.getElementById('nombreUnir').value.trim();
+      const codigo = document.getElementById('codigoUnir').value.trim().toUpperCase().replace(/\s+/g, '');
+      const aviso = document.getElementById('avisoUnir');
+
+      if (!nombre) { aviso.textContent = "⚠️ Escribe tu nombre"; return; }
+      if (!codigo) { aviso.textContent = "⚠️ Escribe el código"; return; }
+
+      nombreUsuario = nombre;
+      codigoSala = "privada-" + codigo;
+      esSalaPublica = false;
+
+      entrarAlChat(`Te has unido a la sala "${codigo}" 🔒`);
+    };
+
+    // ========== SALA PÚBLICA ==========
+    window.entrarPublica = function() {
+      const nombre = document.getElementById('nombrePublica').value.trim();
+      const aviso = document.getElementById('avisoPublica');
+
+      if (!nombre) { aviso.textContent = "⚠️ Escribe tu nombre"; return; }
+
+      nombreUsuario = nombre;
+      codigoSala = "publica";
+      esSalaPublica = true;
+
+      entrarAlChat(`Estás en la sala pública 🌍`);
+    };
+
+    // ========== ENTRAR AL CHAT ==========
+    function entrarAlChat(mensajeSistema) {
+      cerrarTodo();
       document.getElementById('inputMensaje').disabled = false;
       document.getElementById('btnEnviar').disabled = false;
+      document.getElementById('codigoHeader').textContent =
+        esSalaPublica ? "🌍 pública" : codigoSala.replace('privada-', '');
 
-      agregarMensaje('sistema', '', `Te has unido como ${nombreUsuario} ✨`);
+      agregarMensaje('sistema', '', mensajeSistema);
+      iniciarEscucha();
     }
 
-    function enviar() {
+    // ========== ENVIAR ==========
+    window.enviar = function() {
       const input = document.getElementById('inputMensaje');
       const texto = input.value.trim();
       if (!texto) return;
-      agregarMensaje('yo', nombreUsuario, texto);
+
+      push(ref(db, 'mensajes/' + codigoSala), {
+        nombre: nombreUsuario,
+        texto: texto,
+        hora: serverTimestamp()
+      });
+
       input.value = '';
       input.focus();
+    };
+
+    // ========== COMPARTIR ==========
+    window.abrirCompartir = function() {
+      if (esSalaPublica || !codigoSala) {
+        alert("Estás en la sala pública. Crea un código para tener una sala privada.");
+        return;
+      }
+      const codigo = codigoSala.replace('privada-', '');
+      document.getElementById('codigoMostrado').textContent = codigo;
+      cerrarTodo();
+      document.getElementById('modalCompartir').classList.remove('oculto');
+    };
+
+    window.cerrarCompartir = function() {
+      document.getElementById('modalCompartir').classList.add('oculto');
+    };
+
+    window.copiarCodigo = function() {
+      const codigo = document.getElementById('codigoMostrado').textContent;
+      navigator.clipboard.writeText(codigo).then(() => {
+        alert("✅ Código copiado: " + codigo);
+      }).catch(() => {
+        alert("Copia manualmente: " + codigo);
+      });
+    };
+
+    window.compartirWhatsApp = function() {
+      const codigo = document.getElementById('codigoMostrado').textContent;
+      const url = window.location.href;
+      const mensaje = `¡Únete a mi chat en NEON CHAT! 💜\n\nCódigo: *${codigo}*\n\nAbre este enlace y pon el código:\n${url}`;
+      window.open('https://wa.me/?text=' + encodeURIComponent(mensaje), '_blank');
+    };
+
+    // ========== ESCUCHAR MENSAJES ==========
+    function iniciarEscucha() {
+      const mensajesRef = query(ref(db, 'mensajes/' + codigoSala), limitToLast(100));
+      let primeraCarga = true;
+
+      onChildAdded(mensajesRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+        if (primeraCarga && data.nombre === nombreUsuario && data.texto === '') return;
+
+        const tipo = data.nombre === nombreUsuario ? 'yo' : 'otro';
+        agregarMensaje(tipo, data.nombre, data.texto);
+      });
+
+      setTimeout(() => primeraCarga = false, 500);
     }
 
+    // ========== RENDER ==========
     function agregarMensaje(tipo, nombre, texto) {
       const div = document.createElement('div');
       div.className = 'msg ' + tipo;
@@ -339,7 +482,7 @@
         div.textContent = texto;
       } else {
         div.innerHTML = `
-          <div class="nombre">${nombre}</div>
+          <div class="nombre">${escapeHtml(nombre)}</div>
           <div class="texto">${escapeHtml(texto)}</div>
           <div class="hora">${hora}</div>
         `;
@@ -349,29 +492,15 @@
     }
 
     function escapeHtml(str) {
-      return str.replace(/[&<>"']/g, c => ({
+      return String(str).replace(/[&<>"']/g, c => ({
         '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
       }[c]));
     }
 
+    // Enter envío
     document.getElementById('inputMensaje').addEventListener('keypress', e => {
-      if (e.key === 'Enter') enviar();
+      if (e.key === 'Enter') window.enviar();
     });
-    document.getElementById('inputNombre').addEventListener('keypress', e => {
-      if (e.key === 'Enter') entrar();
-    });
-
-    function toggleMusica() {
-      const audio = document.getElementById('audioFondo');
-      const btn = document.getElementById('btnMusica');
-      if (audio.paused) {
-        audio.play();
-        btn.textContent = '🔊';
-      } else {
-        audio.pause();
-        btn.textContent = '🎵';
-      }
-    }
   </script>
 
 </body>
